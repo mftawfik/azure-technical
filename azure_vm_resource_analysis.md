@@ -92,10 +92,11 @@ Once Azure Diagnostics Extension is enabled, you’ll have access to detailed pr
    This query provides insights into the processes consuming the most CPU resources over a specific time period.
 
    ```
-   Perf
+     Perf
    | where ObjectName == "Process" and CounterName == "% Processor Time"
-   | summarize AvgCPU = avg(CounterValue) by InstanceName, ProcessName, bin(TimeGenerated, 5m)
+   | summarize AvgCPU = avg(CounterValue) by InstanceName, bin(TimeGenerated, 5m)
    | top 10 by AvgCPU desc
+
    ```
 
 - **Top Processes by Memory Usage**:
@@ -104,8 +105,9 @@ Once Azure Diagnostics Extension is enabled, you’ll have access to detailed pr
    ```
    Perf
    | where ObjectName == "Process" and CounterName == "Working Set"
-   | summarize AvgMemory = avg(CounterValue) by ProcessName, bin(TimeGenerated, 5m)
+   | summarize AvgMemory = avg(CounterValue) by InstanceName, bin(TimeGenerated, 5m)
    | top 10 by AvgMemory desc
+
    ```
 
 - **Tracking Specific Processes**:
@@ -113,9 +115,10 @@ Once Azure Diagnostics Extension is enabled, you’ll have access to detailed pr
 
    ```
    Perf
-   | where ObjectName == "Process" and ProcessName == "sqlservr"
-   | summarize AvgCPU = avg(CounterValue), AvgMemory = avg(CounterValue) by bin(TimeGenerated, 5m)
+   | where ObjectName == "Process" and CounterName == "% Processor Time" and InstanceName == "sqlservr"
+   | summarize AvgCPU = avg(CounterValue) by bin(TimeGenerated, 5m)
    | order by TimeGenerated desc
+
    ```
 
 #### 5.3 Analyzing Windows Event Logs or Syslog (Linux)
@@ -139,7 +142,7 @@ If you're tracking specific events or errors, Windows Event Logs (for Windows VM
    ```
    Syslog
    | where SeverityLevel <= 3  // Error or higher severity
-   | project TimeGenerated, Facility, Computer, Message
+   | project TimeGenerated, Facility, Computer
    | order by TimeGenerated desc
    ```
 
